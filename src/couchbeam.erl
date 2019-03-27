@@ -102,19 +102,11 @@ server_connection(Host, Port) ->
 %%          {proxy_user, string()}             |
 %%          {proxy_password, string()}         |
 %%          {basic_auth, {username(), password()}} |
-%%          {cookie, string()}                 |
-%%          {oauth, oauthOptions()}
+%%          {cookie, string()}
 %%
 %% username() = string()
 %% password() = string()
 %% SSLOpt = term()
-%% oauthOptions() = [oauth()]
-%% oauth() =
-%%          {consumer_key, string()} |
-%%          {token, string()} |
-%%          {token_secret, string()} |
-%%          {consumer_secret, string()} |
-%%          {signature_method, string()}
 %%
 server_connection(Host, Port, Prefix, Options) when is_binary(Port) ->
     server_connection(Host, binary_to_list(Port), Prefix, Options);

@@ -21,9 +21,8 @@ request(Method, Url, Expect, Options, Headers) ->
     request(Method, Url, Expect, Options, Headers, []).
 request(Method, Url, Expect, Options, Headers, Body) ->
     Accept = {"Accept", "application/json, */*;q=0.9"},
-    {Headers1, Options1} = maybe_oauth_header(Method, Url, Headers, Options),
-    case ibrowse:send_req(Url, [Accept|Headers1], Method, Body,
-            [{response_format, binary}|Options1], ?TIMEOUT) of
+    case ibrowse:send_req(Url, [Accept|Headers], Method, Body,
+            [{response_format, binary}|Options], ?TIMEOUT) of
         Resp={ok, Status, _, _} ->
             case lists:member(Status, Expect) of
                 true -> Resp;
@@ -38,29 +37,17 @@ request_stream(Pid, Method, Url, Options) ->
 request_stream(Pid, Method, Url, Options, Headers) ->
     request_stream(Pid, Method, Url, Options, Headers, []).
 request_stream(Pid, Method, Url, Options, Headers, Body) ->
-    {Headers1, Options1} = maybe_oauth_header(Method, Url, Headers,
-        Options),
     {ok, ReqPid} = ibrowse_http_client:start_link(Url),
-    case ibrowse:send_req_direct(ReqPid, Url, Headers1, Method, Body,
+    case ibrowse:send_req_direct(ReqPid, Url, Headers, Method, Body,
                           [{stream_to, Pid},
                            {response_format, binary},
-                           {inactivity_timeout, infinity}|Options1],
+                           {inactivity_timeout, infinity}|Options],
                            ?TIMEOUT) of
         {ibrowse_req_id, ReqId} ->
             {ok, ReqId};
         Error ->
             Error
     end.
-
-maybe_oauth_header(Method, Url, Headers, Options) ->
-    case couchbeam_util:get_value(oauth, Options) of
-        undefined ->
-            {Headers, Options};
-        OauthProps ->
-            Hdr = couchbeam_util:oauth_header(Url, Method, OauthProps),
-            {[Hdr|Headers], proplists:delete(oauth, Options)}
-    end.
-
 
 clean_mailbox_req(ReqId) ->
     receive

@@ -9,7 +9,6 @@
 -export([parse_options/1, parse_options/2]).
 -export([to_list/1, to_binary/1, to_integer/1, to_atom/1]).
 -export([encode_query/1, encode_query_value/2]).
--export([oauth_header/3]).
 -export([propmerge/3, propmerge1/2]).
 -export([get_value/2, get_value/3]).
 -export([deprecated/3, shutdown_sync/1]).
@@ -60,40 +59,6 @@ encode_query_value(K, V) when is_atom(K) ->
 encode_query_value(K, V) when is_binary(K) ->
     encode_query_value(binary_to_list(K), V);
 encode_query_value(_K, V) -> V.
-
-% build oauth header
-oauth_header(Url, Action, OauthProps) ->
-    {_, _, _, QS, _} = mochiweb_util:urlsplit(Url),
-    QSL = mochiweb_util:parse_qs(QS),
-
-    % get oauth paramerers
-    ConsumerKey = to_list(get_value(consumer_key, OauthProps)),
-    Token = to_list(get_value(token, OauthProps)),
-    TokenSecret = to_list(get_value(token_secret, OauthProps)),
-    ConsumerSecret = to_list(get_value(consumer_secret, OauthProps)),
-    SignatureMethodStr = to_list(get_value(signature_method,
-            OauthProps, "HMAC-SHA1")),
-
-    SignatureMethodAtom = case SignatureMethodStr of
-        "PLAINTEXT" ->
-            plaintext;
-        "HMAC-SHA1" ->
-            hmac_sha1;
-        "RSA-SHA1" ->
-            rsa_sha1
-    end,
-    Consumer = {ConsumerKey, ConsumerSecret, SignatureMethodAtom},
-    Method = case Action of
-        delete -> "DELETE";
-        get -> "GET";
-        post -> "POST";
-        put -> "PUT";
-        head -> "HEAD"
-    end,
-    Params = oauth:sign(Method, Url, QSL, Consumer, Token, TokenSecret)
-    -- QSL,
-    {"Authorization", "OAuth " ++ oauth:header_params_encode(Params)}.
-
 
 %% @doc merge 2 proplists. All the Key - Value pairs from both proplists
 %% are included in the new proplists. If a key occurs in both dictionaries

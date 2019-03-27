@@ -345,7 +345,7 @@ Options = [{basic_auth, {UserName, Password}}],
 S1 = couchbeam:server_connection(Host, Port, Prefix, Options).
 '''
 
-Couchbeam support SSL, OAuth, Basic Authentication, and Proxy. You can
+Couchbeam support SSL, Basic Authentication, and Proxy. You can
 also set a cookie. For more informations about the options have a look
 in the {@link couchbeam:server_connection/4} documentation.
 
